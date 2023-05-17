@@ -106,6 +106,18 @@ services:
       - elasticsearch
     restart: unless-stopped
 
+  word-generator:
+    container_name: word-generator
+    build:
+      context: ./word-generator
+    ports:
+      - 5000:5000
+    networks:
+      - elk
+    depends_on:
+      - logstash
+    restart: unless-stopped  
+
 networks:
   elk:
     driver: bridge
