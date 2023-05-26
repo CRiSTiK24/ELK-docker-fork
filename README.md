@@ -1,16 +1,67 @@
-# Using Elastic stack (ELK) on Docker to input random words in english with a dockerized python scropt
+# Using Elastic stack (ELK) on Docker to input random words in english with a dockerized python script
 
-The objective of this project was to learn some Docker and Elastic Search + Kibana. My initial approach was pulling the Elastic Search and the Kibana images and then uniting them, but this method proved very fast to be a hassle. Elastic Search wrote a very verbose output where inbetween there was the password that Kibana needed in order to communicate with ES(Elastic Search)
+## Creation Process
 
-## tl;dr
+### First Trial
 
+The objective of this project was to learn some Docker and Elastic Search + Kibana. My initial approach was pulling the Elastic Search and the Kibana images and then uniting them, but this method proved very fast to be a hassle. Elastic Search wrote a very verbose output where inbetween there was the password that Kibana needed in order to communicate with ES(Elastic Search). The trial can be seen at [CRiSTiK24/GettingReadyForCERN](https://github.com/CRiSTiK24/GettingReadyForCERN)
+
+### The new approach
+
+This new version uses instead an already done Docker Compose setup with Elastic Search, Kibana and Logstash, which I initially didn't think on using. After checking it out, and seeing that it works in an awesome way, I decided to go through Docker Fundamentals, to see what I could build on top. The resource I used to learn, which is super-great is the following: [Introduction to Containers](https://container.training/intro-selfpaced.yml.html#1)
+
+After going through some hundreds of slides, I decided to write a python script that generates random words in english, and to try to create an image that executes it. After that, to try to capture the words and send them to Elastic Search, so I can see them with kibana. The script can be found at /image-creator-word-generator/main.py
+
+After creating an image with the Dockerfile, I uploaded the image to Dockerhub, you can see it at [cristik24/word-generator](https://hub.docker.com/r/cristik24/word-generator)
+
+Then, I could use it as any other image, so i created "/word-generator" and pulled the image with a dockerfile, which worked after adding it to the docker compose!
+
+The thing now was, how should I send the output of the word-generator container to ElasticSearch? I tried to find a clean way to capture the output and use `netcat -q0 localhost 50000` to send the information to Logstash, which would store the information in Elastic Search and then Kibana would get that information when checking the new information in Elastic Search. I had some ideas:
+
+1. Recreating the image `word-generator` to make it send the python command to `netcat -q0 localhost 50000` with a pipe. This was the cleanest so fast, but I wanted to impose the restriction of not modifying the image, since it would not always be possible in images made by others
+
+2. The dirty way, sending the whole output of the `docker-compose up > output.exe`. This way it would send any error to elastic search, that is something I wanted to do too.
+
+I went to number 2, though the best would have been finding a way to redirect the output from inside the /docker-compose.yml to the netcat. If someone know how to do it, feel free to open an issue ^^
+
+So at the end, after having the file output.exe with all the names, I wrote a little script that gets the tail from it and sends it to the netcat every 2 secons. It's the script in /putter.sh
+
+So, with this all together, i could test it all, and it worked!
+
+## How to install it?
+
+First of all, clone this repo:
+
+```
+git clone https://github.com/CRiSTiK24/ELK-docker-fork.git
+```
+Then set up the docker compose:
 ```sh
 docker-compose up setup
 ```
-
+Give execution permissions to the shell script
 ```sh
-docker-compose up
+chmod +x putter.sh
 ```
+
+## How to start it?
+
+
+First, we want all the output of the docker compose to be put intro a file
+```sh
+docker-compose up > output.txt
+```
+Then, we start the script that will read the file and upload it.
+```sh
+./putter.sh
+```
+After this, we leave some minutes the kibana to start. Once you have waited enough, you'll be able to open a browser and open it at localhost with port 5601!
+
+The name and password is at the end of this file. You will find the words at Obervability>Logs>Stream
+
+![If you read this, the Kibana image has not loaded](https://i.imgur.com/CjyHU60.png)
+
+# From down below, the readme is a simplified version of the original repo i Forked
 
 ![Animated demo](https://user-images.githubusercontent.com/3299086/155972072-0c89d6db-707a-47a1-818b-5f976565f95a.gif)
 
