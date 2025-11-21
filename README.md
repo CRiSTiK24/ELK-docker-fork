@@ -4,7 +4,7 @@
 
 ### First Trial
 
-The objective of this project was to learn some Docker and Elastic Search + Kibana. My initial approach was pulling the Elastic Search and the Kibana images and then uniting them, but this method proved very fast to be a hassle. Elastic Search wrote a very verbose output where inbetween there was the password that Kibana needed in order to communicate with ES(Elastic Search). The trial can be seen at [CRiSTiK24/GettingReadyForCERN](https://github.com/CRiSTiK24/GettingReadyForCERN)
+The objective of this project was to learn some Docker and Elastic Search + Kibana. My initial approach was pulling the Elastic Search and the Kibana images and then uniting them, but this method proved very fast to be a hassle. Elastic Search wrote a very verbose output where inbetween there was the password that Kibana needed in order to communicate with ES(Elastic Search).
 
 ### The new approach
 
